@@ -21,7 +21,7 @@ class nnlinear_holom_eigs_solver(object):
         rankTol : treshold for singular values
         resTol : treshold for the residual (||func(z)v||<=epsilon)
     """
-    def __init__(self, m, N, l=2, mat_func, cont_func, Dcont_func=None, cont_func_params={'center':0, 'radius':1}, rankTol=1e-6, resTol=1e-6):
+    def __init__(self, m, N, l, mat_func, cont_func, Dcont_func=None, cont_func_params={'center':0, 'radius':1}, rankTol=1e-6, resTol=1e-6):
         self.m = m
         self.l = l
         self.N = N
@@ -45,7 +45,7 @@ class nnlinear_holom_eigs_solver(object):
         A_0N = 0.0
         A_1N = 0.0
         for ti in t_points:
-            MAT = np.dot(inv(self.mat_func(self.phi(ti))), Vhat) 
+            MAT  = np.dot(inv(self.mat_func(self.phi(ti))), Vhat) 
             A_0N = A_0N + MAT*self.Dphi(ti)
             A_1N = A_1N + MAT*self.phi(ti)*self.Dphi(ti)
 
@@ -53,13 +53,11 @@ class nnlinear_holom_eigs_solver(object):
         A_1N = A_1N/(1j*N)
         V, SIGMA, Wh = svd( A_0N)
         W            = inv( Wh )
-        INDICES = np.where( np.abs(SIGMA) > self.rankTol )[0]
-        SIGMA0 = SIGMA[INDICES]
+        SIGMA0       = SIGMA[np.abs(SIGMA) > self.rankTol]
         #k is always less or equal to l<=m is the number of eigenvalues inside the contour
-        #if k=l then there may be more than l eigenvalues inside the contour
+        #if k=len(SIGMA0)=l then there may be more than l eigenvalues inside the contour
         #eigs close to the contour either inside or outside may lead to difficulties in the rank test
-        k = len( INDICES )
-        return [k, SIGMA0, V, W, A_1N]
+        return [SIGMA0, V, W, A_1N]
 
     def eigvals(self):
         """
@@ -72,7 +70,8 @@ class nnlinear_holom_eigs_solver(object):
         R = self.cont_func_params['radius']
         l = self.l
         while True:
-            k, SIGMA0, V, W, A_1N =  self.ContourIntegralEval(l)
+            SIGMA0, V, W, A_1N =  self.ContourIntegralEval(l)
+            k = len(SIGMA0)
             if k < l:
                 #the inverse of sigma0 might not exists also there might be cases where k=0...need to solve them
                 SIGMA0_INV = np.diag( 1/SIGMA0 )#the inverse
