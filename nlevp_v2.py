@@ -46,20 +46,18 @@ class nnlinear_holom_eigs_solver(object):
         #Maybe have the user input his/her own points
         #t = np.linspace(start, end, self.N, endpoint=False)
         Vhat = np.random.randn(self.m, l)
-        #A_0N = 0.0
-        #A_1N = 0.0
-        lst = []
+        blck_mat_lst = []
         for p in range(2*self.K):
             A_pN = 0
             for ti in t_points:
                 MAT  = np.dot(inv(self.mat_func(self.phi(ti))), Vhat) 
                 A_pN = A_pN + MAT*(self.phi(ti)**p)*self.Dphi(ti)
-                #A_1N = A_1N + MAT*self.phi(ti)*self.Dphi(ti)
-            A_pN = A_pN/(1j*N) 
-            lst.append(A_pN)
+            A_pN = A_pN/(1j*N)
+            blck_mat_lst.append(A_pN)
         
-        B0 = self.BlockMatrix(lst[:-1])
-        B1 = self.BlockMatrix(lst[1:])
+        B0 = self.BlockMatrix(blck_mat_lst[: -1])
+        B1 = self.BlockMatrix(blck_mat_lst[1: ])
+        
         V, SIGMA, Wh = svd(B0, full_matrices=False)
         W            = inv( Wh )
         SIGMA0       = SIGMA[np.abs(SIGMA) > self.rankTol]
@@ -100,8 +98,8 @@ class nnlinear_holom_eigs_solver(object):
                 break
                 
             else: 
-                l = l +1
-        if len(LAMBDA)==0:
+                l = l + 1
+        if len(LAMBDA) == 0:
             print( 'No eigenvalues were found inside/outside the given countour!')
             return [0, 0]
         else:
