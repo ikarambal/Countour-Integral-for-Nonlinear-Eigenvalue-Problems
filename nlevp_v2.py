@@ -22,6 +22,9 @@ class nnlinear_holom_eigs_solver(object):
         resTol : treshold for the residual (||func(z)v||<=epsilon)
     """
     def __init__(self, m, N, l, K, mat_func, cont_func, Dcont_func, cont_func_params, rankTol=1e-4, resTol=1e-6):
+        """
+        if the derivative is not provided, thinking to implement a second order method to get the Jacobian (finite difference)
+        """
         self.m = m
         self.l = l
         self.N = N
@@ -34,7 +37,21 @@ class nnlinear_holom_eigs_solver(object):
         self.K = K
     def BlockMatrix(self, lst):
         """
-        a block Hankel matrix
+        a block Hankel matrix, i.e.,
+        B = 
+        [A1 A2 ...A_k]
+        [A2 A3 ...A_{K+1}]
+        .
+        .
+        [A_K A_{K+1} ... A_{2K-1}]
+        Input
+        =====
+        lst : a list containing matrices of dimension m by l
+        
+        Output
+        =====
+        return a matrix B of shape Km by Kl 
+        
         """
         return np.vstack([np.hstack(lst[i:i+self.K]) for i in range(self.K)])
     def ContourIntegralEval(self, l):
@@ -42,9 +59,10 @@ class nnlinear_holom_eigs_solver(object):
         """
         Implement trapezoid to compute the integrals
         """
-        t_points = np.linspace(0, 2*np.pi, self.N, endpoint=False)
-        #Maybe have the user input his/her own points
+        #Maybe have the user to input his/her own points, [start, end, step=(start-end)/N]
         #t = np.linspace(start, end, self.N, endpoint=False)
+        t_points = np.linspace(0, 2*np.pi, self.N, endpoint=False)
+        #Deos the choice fo the distribution influence the process?
         Vhat = np.random.randn(self.m, l)
         blck_mat_lst = []
         for p in range(2*self.K):
@@ -99,6 +117,7 @@ class nnlinear_holom_eigs_solver(object):
                 
             else: 
                 l = l + 1
+        #Neet to think of an efficient and more elegant way
         if len(LAMBDA) == 0:
             print( 'No eigenvalues were found inside/outside the given countour!')
             return [0, 0]
