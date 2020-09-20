@@ -60,8 +60,6 @@ class nnlinear_holom_eigs_solver(object):
         
         B0 = self.BlockMatrix(lst[:-1])
         B1 = self.BlockMatrix(lst[1:])
-        #A_0N = A_0N/(1j*N)
-        #A_1N = A_1N/(1j*N)
         V, SIGMA, Wh = svd(B0, full_matrices=False)
         W            = inv( Wh )
         SIGMA0       = SIGMA[np.abs(SIGMA) > self.rankTol]
@@ -108,40 +106,4 @@ class nnlinear_holom_eigs_solver(object):
             return [0, 0]
         else:
             return (np.array( LAMBDA), np.array(VECTORS))
-    
-m = 4
-N = 25
-c = 0
-R = 0.5
-K = 2
-#rankTol = 1e-4
-#resTol = 1e-3
-l    = 2
-def Mfunc2(z):
-    M = np.diag(np.array((3,1,3,1)))
-    C = np.array([[0.4,0,-0.3,0], [0,0,0,0],[-0.3,0,0.5,-0.2],[0,0,-0.2,0.2]])
-    K = np.array([[-7 ,2, 4,  0], [2 ,-4, 2, 0], [4, 2, -9, 3], [0, 0, 3, -3]])
-    return (z**2)*M+z*C+K
-def  Mfunc(z):
-  T2 = np.array([[0,8, 0],[0, 6,0],[0, 0,1]])
-  T1 = np.array([[1, -6, 0], [2, -7, 0], [0, 0, 0]])
-  T0 = np.eye(3)#
-  return T0+z*T1+(z**2)*T2
-cfunc = lambda t: c+R*np.exp(1j*t)
-Dcfunc = lambda t: 1j*R*np.exp(1j*t)
-params = {'center':c, 'radius':R}
-#cont_func_params=**kwargs
-solver = nnlinear_holom_eigs_solver(m, N, l, K, Mfunc2, cfunc, Dcfunc, params, rankTol=1e-4, resTol=1e-6)
-print(solver.ContourIntegralEval(l))
-# z, v= solver.eigvals()
-# print(z)
-# #=====ploting
-# t = np.linspace(0, 2*np.pi, 300, endpoint=True)
-# s = cfunc(t)
-# x = s.real 
-# y = s.imag
-# plt.figure()
-# plt.plot(x, y)
-# plt.plot(z.real, z.imag, 'bo', markersize=6)
-# plt.grid('on')
-# plt.show()
+   
