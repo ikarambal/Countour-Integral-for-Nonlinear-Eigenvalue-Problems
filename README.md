@@ -1,2 +1,5 @@
 # Countour-Integral-for-Nonlinear-Eigenvalue-Problems
-This is an python implementation of the following paper https://arxiv.org/pdf/1003.1580.pdf
+
+This is a Python implementation of the following paper https://arxiv.org/pdf/1003.1580.pdf
+The approach is somehow computing zeros of a holomorphic function in a closed contour
+Let $T(z)v=0$
