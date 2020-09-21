@@ -104,15 +104,11 @@ class nnlinear_holom_eigs_solver(object):
                 W0         = W[:self.K*l, :k]
                 B          = np.dot( np.dot( V0.conj().T, A_1N), np.dot( W0, SIGMA0_INV ) )
                 EIGVALS, EIGVECTS = eig( B )
-                print('k', k)
-                print(B.shape)
                 for pos, la_i in enumerate( EIGVALS ):
                     eigvect_i = np.dot( V0, EIGVECTS[:, pos] )
                     if norm( np.dot( self.mat_func(la_i), eigvect_i ), np.inf) <= self.resTol and np.abs(la_i - c) < R:
-                        
                         VECTORS.append(eigvect_i)
                         LAMBDA.append(la_i)
-                        
                 break
                 
             else: 
@@ -120,7 +116,7 @@ class nnlinear_holom_eigs_solver(object):
         #Neet to think of an efficient and more elegant way
         if len(LAMBDA) == 0:
             print( 'No eigenvalues were found inside/outside the given countour!')
-            return [0, 0]
+            pass
         else:
             return (np.array( LAMBDA), np.array(VECTORS))
    
