@@ -47,6 +47,7 @@ class nnlinear_holom_eigs_solver(object):
         Input
         =====
         lst : a list containing matrices of dimension m by l
+              [A1, A2, ..., A_K, A_{K+1}, ... A_{2K-1}] 
         
         Output
         =====
