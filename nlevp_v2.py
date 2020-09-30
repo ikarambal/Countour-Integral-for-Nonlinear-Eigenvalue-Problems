@@ -21,7 +21,7 @@ class nnlinear_holom_eigs_solver(object):
         rankTol : treshold for singular values
         resTol : treshold for the residual (||func(z)v||<=epsilon)
     """
-    def __init__(self, m, N, l, K, mat_func, cont_func, Dcont_func, cont_func_params, rankTol=1e-4, resTol=1e-6):
+    def __init__(self, m, N, l, K, mat_func, cont_func, Dcont_func, rankTol=1e-4, resTol=1e-6):
         """
         If the derivative is not provided, thinking to implement a second order method to get the Jacobian (finite difference)
         Need to make it for more general closed contour
@@ -34,7 +34,6 @@ class nnlinear_holom_eigs_solver(object):
         self.Dphi = Dcont_func
         self.rankTol = rankTol
         self.resTol  = resTol 
-        self.cont_func_params = cont_func_params
         self.K = K
     def BlockMatrix(self, lst):
         """
@@ -61,9 +60,7 @@ class nnlinear_holom_eigs_solver(object):
         """
         Implement trapezoid to compute the integrals
         """
-        #t = np.linspace(start, end, self.N, endpoint=False)
         t_points = np.linspace(0, 2*np.pi, self.N, endpoint=False)
-        #Deos the choice of the distribution influences the process?
         Vhat = np.random.randn(self.m, l)
         blck_mat_lst = []
         for p in range(2*self.K):
@@ -81,7 +78,6 @@ class nnlinear_holom_eigs_solver(object):
         W            = inv( Wh )
         sigma0       = sigma[np.abs(sigma) > self.rankTol]
         #k is always less or equal to l<=m is the number of eigenvalues inside the contour
-        #if k=len(SIGMA0)=l then there may be more than l eigenvalues inside the contour
         #eigs close to the contour either inside or outside may lead to difficulties in the rank test
         return [sigma0, V, W, B1]
 
@@ -92,8 +88,6 @@ class nnlinear_holom_eigs_solver(object):
         """
         eigenvals = []
         eigenvecs = []
-        c = self.cont_func_params['center']
-        R = self.cont_func_params['radius']
         l = self.l
         while True:
             sigma0, V, W, A_1N =  self.ContourIntegralEval(l)
@@ -107,14 +101,14 @@ class nnlinear_holom_eigs_solver(object):
                 EIGVALS, EIGVECTS = eig( B )
                 for pos, la_i in enumerate( EIGVALS ):
                     v_i = np.dot( V0[:m, :], EIGVECTS[:, pos] )
-                    if norm( np.dot( self.mat_func(s_i), v_i ), np.inf) <= self.resTol and np.abs(s_i - c) < R:
+                    if norm( np.dot( self.mat_func(s_i), v_i ), np.inf) <= self.resTol:
                         eigenvecs.append(v_i)
                         eigenvals.append(s_i)
                 break
                 
             else: 
                 l = l + 1
-        #Neet to think of an efficient and more elegant way
+        #Neet to think of an efficient and elegant way
         if len(eigenvals) == 0:
             print( 'No eigenvalues were found inside/outside the given countour!')
             pass
