@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.linalg import svd, inv, eig, norm
 
 class nnlinear_holom_eigs_solver(object):
@@ -9,8 +8,10 @@ class nnlinear_holom_eigs_solver(object):
             T(z)v=0, where v nonzero in C^m and z in Gamma 
             Gamma ={z in C^m: f(z)=0} a closed contour, e.g., {z: |z-c|=R, c in C^m and R positive number}
         The contour is assumed to be 2pi period smooth or any diffeomorphism. Thus using trapezoid 
-        we can achieve an exponential convergence rate. By default l=1 and the user
+        we can achieve an exponential convergence rate. By default l=2 and the user
         need not to input it since we adaptively compute the best l
+        Input
+        ====
         m : the size of the matrix
         l : initial guess of the number of eigenvalues inside the domain
         N : discretization size
@@ -68,7 +69,7 @@ class nnlinear_holom_eigs_solver(object):
             for ti in t_points:
                 MAT  = np.dot(inv(self.mat_func(self.phi(ti))), Vhat) 
                 A_pN = A_pN + MAT*(self.phi(ti)**p)*self.Dphi(ti)
-            A_pN = A_pN/(1j*N)
+            A_pN = A_pN/(1j*self.N)
             blck_mat_lst.append(A_pN)
         
         B0 = self.BlockMatrix(blck_mat_lst[: -1])
@@ -100,7 +101,7 @@ class nnlinear_holom_eigs_solver(object):
                 B          = np.dot( np.dot( V0.conj().T, A_1N), np.dot( W0, sigma0_inv ) )
                 EIGVALS, EIGVECTS = eig( B )
                 for pos, la_i in enumerate( EIGVALS ):
-                    v_i = np.dot( V0[:m, :], EIGVECTS[:, pos] )
+                    v_i = np.dot( V0[:self.m, :], EIGVECTS[:, pos] )
                     if norm( np.dot( self.mat_func(s_i), v_i ), np.inf) <= self.resTol:
                         eigenvecs.append(v_i)
                         eigenvals.append(s_i)
