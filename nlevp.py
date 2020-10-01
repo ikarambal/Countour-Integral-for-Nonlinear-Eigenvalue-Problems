@@ -6,8 +6,8 @@ class nnlinear_holom_eigs_solver(object):
     """
         Compute eigenvalues of holomorphic square matrix valued functions given by 
             T(z)v=0, where v nonzero in C^m and z in Gamma 
-            Gamma ={z in C^m: f(z)=0} a closed contour, e.g., {z: |z-c|=R, c in C^m and R positive number}
-        The contour is assumed to be 2pi period smooth or any diffeomorphism. Thus using trapezoid 
+            Gamma ={z in C^m: f(z)=0} a closed smooth contour, e.g., {z: |z-c|=R, c in C^m and R positive number}
+        The contour is assumed to be any diffeomorphism. Thus using trapezoid 
         we can achieve an exponential convergence rate. By default l=2 and the user
         need not to input it since we adaptively compute the best l
         Input
@@ -17,25 +17,29 @@ class nnlinear_holom_eigs_solver(object):
         N : discretization size
         mat_func: the holomorphic function should be callable
         cont_func : the contour function in parametrized form, f(t)
-        params : parameters for the contour function (radius and centre) for smooth transformation from a circle
         Dcont_func : the derivative of the contour function, i.e., f'(t)
+        quad_rule : quadrature rules. Default is trapz, trapezoid
         rankTol : treshold for singular values
         resTol : treshold for the residual (||func(z)v||<=epsilon)
     """
-    def __init__(self, m, N, l, K, mat_func, cont_func, Dcont_func, rankTol=1e-4, resTol=1e-6):
+    def __init__(self, m, N, l, K, mat_func, cont_func, Dcont_func=None, quad_rule='trapz', rankTol=1e-4, resTol=1e-6):
         """
         If the derivative is not provided, thinking to implement a second order method to get the Jacobian (finite difference)
-        Need to make it for more general closed contour
+        if not Dcont_func:
+            return second_order_derivative
+        
         """
         self.m = m
         self.l = l
         self.N = N
+        self.K = K
         self.mat_func = mat_func
         self.phi = cont_func
         self.Dphi = Dcont_func
+        self.quad_rule = quad_rule
         self.rankTol = rankTol
         self.resTol  = resTol 
-        self.K = K
+        
     def BlockMatrix(self, lst):
         """
         a block Hankel matrix, i.e.,
@@ -59,8 +63,11 @@ class nnlinear_holom_eigs_solver(object):
     def ContourIntegralEval(self, l):
         
         """
-        Implement trapezoid to compute the integrals
+        Implement trapezoid to compute the integrals. Adding  other quadrature rules soon
         """
+        if not self.Dcont_func:
+            #return second_order_derivative
+            pass
         t_points = np.linspace(0, 2*np.pi, self.N, endpoint=False)
         Vhat = np.random.randn(self.m, l)
         blck_mat_lst = []
