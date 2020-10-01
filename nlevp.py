@@ -109,6 +109,7 @@ class nnlinear_holom_eigs_solver(object):
                 EIGVALS, EIGVECTS = eig( B )
                 for pos, la_i in enumerate( EIGVALS ):
                     v_i = np.dot( V0[:self.m, :], EIGVECTS[:, pos] )
+                    #add option of other norms
                     if norm( np.dot( self.mat_func(s_i), v_i ), np.inf) <= self.resTol:
                         eigenvecs.append(v_i)
                         eigenvals.append(s_i)
