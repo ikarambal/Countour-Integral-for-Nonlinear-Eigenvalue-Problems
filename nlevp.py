@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 from scipy.linalg import svd, inv, eig, norm
 
-class nnlinear_holom_eigs_solver(object):
+class nlevp(object):
     """
         Compute eigenvalues of holomorphic square matrix valued functions given by 
             T(z)v=0, where v nonzero in C^m and z in Gamma 
@@ -60,10 +60,13 @@ class nnlinear_holom_eigs_solver(object):
         
         """
         return np.vstack([np.hstack(lst[i:i+self.K]) for i in range(self.K)])
-    def ContourIntegralEval(self, l):
+    def EvalContourIntegral(self, l):
         
         """
         Implement trapezoid to compute the integrals. Adding  other quadrature rules soon
+        Input
+        ====
+            l : number of columns in the random matrix Vhat (m x l) which is the initial numbers of eigs for the problem
         """
         if not self.Dcont_func:
             #return second_order_derivative
@@ -85,11 +88,11 @@ class nnlinear_holom_eigs_solver(object):
         V, sigma, Wh = svd(B0, full_matrices=False)
         W            = inv( Wh )
         sigma0       = sigma[np.abs(sigma) > self.rankTol]
-        #k is always less or equal to l<=m is the number of eigenvalues inside the contour
+        #k is always less or equal to l<=m, the number of eigenvalues inside the contour
         #eigs close to the contour either inside or outside may lead to difficulties in the rank test
         return [sigma0, V, W, B1]
 
-    def eigvals(self):
+    def eigs(self):
         """
         compute eigvalues and eigenvectors where l is adaptively computed.
         
@@ -98,7 +101,7 @@ class nnlinear_holom_eigs_solver(object):
         eigenvecs = []
         l = self.l
         while True:
-            sigma0, V, W, A_1N =  self.ContourIntegralEval(l)
+            sigma0, V, W, A_1N =  self.EvalContourIntegral(l)
             k = len(sigma0)
             if k < l*self.K:
                 #the inverse of sigma0 might not exists also there might be cases where k=0...need to solve them
