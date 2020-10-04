@@ -86,7 +86,7 @@ class nlevp(object):
         B1 = self.BlockMatrix(blck_mat_lst[1: ])
         
         V, sigma, Wh = svd(B0, full_matrices=False)
-        W            = inv( Wh )
+        W            = Wh.conj().T
         sigma0       = sigma[np.abs(sigma) > self.rankTol]
         #k is always less or equal to l<=m, the number of eigenvalues inside the contour
         #eigs close to the contour either inside or outside may lead to difficulties in the rank test
@@ -106,8 +106,8 @@ class nlevp(object):
             if k < l*self.K:
                 #the inverse of sigma0 might not exists also there might be cases where k=0...need to solve them
                 sigma0_inv = np.diag( 1/sigma0 )#the inverse
-                V0         = V[:self.K*self.m, :k]
-                W0         = W[:self.K*l, :k]
+                V0         = V[:, :k]
+                W0         = W[:, :k]
                 B          = np.dot( np.dot( V0.conj().T, A_1N), np.dot( W0, sigma0_inv ) )
                 EIGVALS, EIGVECTS = eig( B )
                 for pos, la_i in enumerate( EIGVALS ):
